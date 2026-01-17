@@ -1,0 +1,715 @@
+"""
+MongoDB models and database utilities.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+For more information, see [MongoDB Transactions Documentation](https://www.mongodb.com/docs/manual/core/transactions/).- Pass `session=session` to all model operations within transaction- Requires replica set configuration- Handle errors appropriately- Keep transactions short and focused- Transactions ensure all-or-nothing operations- Use `MongoDB.transaction()` context manager for automatic handling## Summary```    assert final_count == initial_count + 1  # Count increased    final_count = User.count()            User.insert_one({'email': 'test@test.com'}, session=session)    with MongoDB.transaction() as session:        initial_count = User.count()def test_transaction_commit():# Test transaction commit    assert initial_count == final_count  # Count unchanged    final_count = User.count()            pass    except:            raise Exception('Force rollback')  # Simulate error            User.insert_one({'email': 'test@test.com'}, session=session)        with MongoDB.transaction() as session:    try:        initial_count = User.count()def test_transaction_rollback():# Test transaction rollback```python## Testing Transactions- Consider denormalization to avoid transactions- Use bulk operations when possible- Minimize number of operations- Keep transactions shortTransactions have overhead. For better performance:### Performance Issues```        raise            continue            time.sleep(0.1)  # Brief delay before retry        if 'TransientTransactionError' in str(e) and attempt < max_retries - 1:    except OperationFailure as e:            break            # Your operations        with MongoDB.transaction() as session:    try:for attempt in range(max_retries):max_retries = 3import timefrom pymongo.errors import OperationFailure```python**Solution**: Retry the transaction:**Cause**: Transaction took too long or conflicted with another transaction.### Error: "Transaction X has been aborted"```mongosh --eval "rs.initiate()"# Restart and initialize  replSetName: "rs0"replication:# In mongod.conf```bash**Solution**: Your MongoDB is running as standalone. Convert to replica set:### Error: "Transaction numbers are only allowed on a replica set member or mongos"## Troubleshooting```send_email(data['email'])  # Do this after transaction    user_id = User.insert_one(data, session=session)with MongoDB.transaction() as session:# Good - external calls outside transaction    send_email(data['email'])  # Don't do this!    user_id = User.insert_one(data, session=session)with MongoDB.transaction() as session:# Bad - external API in transaction```python### 4. Avoid External API Calls in Transactions```)    write_concern=WriteConcern('majority')    read_concern=ReadConcern('snapshot'),session.start_transaction(session = MongoDB.start_session()from pymongo import ReadConcern, WriteConcern```python### 3. Use Read Concern and Write Concern (Advanced)```    # Handle other errors    logger.error(f'Unexpected error: {str(e)}')except Exception as e:    # Handle transaction-specific errors    logger.error(f'Transaction failed: {str(e)}')except (ConnectionFailure, OperationFailure) as e:        pass        # Your operations    with MongoDB.transaction() as session:try:from pymongo.errors import ConnectionFailure, OperationFailure```python### 2. Handle Transaction Errors Properly```        User.insert_one({'index': i}, session=session)    for i in range(10000):  # Too many operationswith MongoDB.transaction() as session:# Bad - long-running transaction        User.update_one({'_id': user_id}, {'$set': {'status': 'active'}}, session=session)with MongoDB.transaction() as session:# Good - quick transaction```python### 1. Keep Transactions Short## Best Practices```        raise        logger.error(f'Bulk publish failed: {str(e)}')    except Exception as e:                        return published_count                        )                session=session                {'$inc': {'article_count': published_count}},                {'_id': ObjectId(category_id)},            Category.update_one(            # Update category article count                            published_count += 1                                )                    session=session                    },                        }                            'category_id': category_id                            'published_at': datetime.utcnow(),                            'published': True,                        '$set': {                    {                    {'_id': ObjectId(article_id)},                Article.update_one(                # Update article                                    continue  # Skip already published                if article.get('published'):                                        continue                if not article:                                article = Article.find_by_id(article_id, session=session)            for article_id in article_ids:            # Publish each article                        published_count = 0                            raise ValueError('Category not found')            if not category:            category = Category.find_by_id(category_id, session=session)            # Verify category exists                        db = MongoDB.get_db()        with MongoDB.transaction() as session:    try:        """Publish multiple articles and update category counts."""def bulk_publish_articles(article_ids: List[str], category_id: str):from app.models import Article, Categoryfrom app.database import MongoDB```python### Example 5: Batch Operations with Validation```        return False        logger.error(f'User deletion failed: {str(e)}')    except Exception as e:                        return True                        )                session=session                {'_id': ObjectId(user_id)},            User.delete_one(            # Finally delete the user                        )                session=session                {'user_id': user_id},            db.comments.delete_many(            # Delete user's comments                        )                session=session                {'user_id': user_id},            db.files.delete_many(            # Delete user's files                        )                session=session                {'user_id': user_id},            db.collections.delete_many(            # Delete user's collections                        )                session=session                {'author_id': user_id},            db.articles.delete_many(            # Delete user's articles                        db = MongoDB.get_db()        with MongoDB.transaction() as session:    try:        """Delete user and all related data atomically."""def delete_user_with_data(user_id: str):from bson import ObjectIdfrom app.models import User, Article, Collectionfrom app.database import MongoDB```python### Example 4: Cascading Delete with Related Documents```        raise        logger.error(f'Order processing failed: {str(e)}')    except Exception as e:                        return str(order_id)                        }, session=session)                'type': 'purchase'                'amount': sum(item['price'] * item['quantity'] for item in items),                'user_id': user_id,                'order_id': str(order_id),            db.transactions.insert_one({            # Record transaction                            )                    session=session                    {'$inc': {'stock': -item['quantity']}},                    {'_id': ObjectId(item['product_id'])},                db.products.update_one(            for item in items:            # Update inventory                        }, session=session).inserted_id                'total': sum(item['price'] * item['quantity'] for item in items)                'status': 'pending',                'items': items,                'user_id': user_id,            order_id = db.orders.insert_one({            # Create order                                raise ValueError(f"Insufficient stock for {item['product_id']}")                if not product or product['stock'] < item['quantity']:                                )                    session=session                    {'_id': ObjectId(item['product_id'])},                product = db.products.find_one(            for item in items:            # Check inventory for all items                        db = MongoDB.get_db()        with MongoDB.transaction() as session:    try:        """Process order and update inventory atomically."""def process_order(user_id: str, items: List[Dict]):from app.database import MongoDB```python### Example 3: Order Processing with Inventory```        return False        logger.error(f'Article transfer failed: {str(e)}')    except Exception as e:                        return True                            )                    session=session                    {'$set': {'collection_id': to_collection_id}},                    {'_id': ObjectId(article_id)},                Article.update_one(            for article_id in article_ids:            # Update article metadata                        )                session=session                {'$addToSet': {'article_ids': {'$each': [ObjectId(aid) for aid in article_ids]}}},                {'_id': ObjectId(to_collection_id)},            Collection.update_one(            # Add articles to destination collection                        )                session=session                {'$pull': {'article_ids': {'$in': [ObjectId(aid) for aid in article_ids]}}},                {'_id': ObjectId(from_collection_id)},            Collection.update_one(            # Remove articles from source collection        with MongoDB.transaction() as session:    try:        """Transfer articles between collections atomically."""def transfer_articles(from_collection_id: str, to_collection_id: str, article_ids: List[str]):from bson import ObjectIdfrom app.models import Collection, Articlefrom app.database import MongoDB```python### Example 2: Transfer Articles Between Collections```        return jsonify({'error': 'Registration failed'}), 500        logger.error(f'Registration failed: {str(e)}')    except Exception as e:                        return jsonify({'id': user_id, 'message': 'User registered'}), 201                        }, session=session)                'theme': 'light'                'email_notifications': True,                'user_id': user_id,            db.user_settings.insert_one({            # Create default settings                        }, session=session)                'bio': ''                'last_name': data.get('last_name', ''),                'first_name': data.get('first_name', ''),                'user_id': user_id,            db.profiles.insert_one({            db = MongoDB.get_db()            # Create user profile                        }, session=session)                'status': 'pending'                'password': hash_password(data['password']),                'email': data['email'],            user_id = User.insert_one({            # Create user                            return jsonify({'error': 'User already exists'}), 400            if existing:                        )                session=session                {'email': data['email']},            existing = User.find_one(            # Check if user exists        with MongoDB.transaction() as session:    try:        data = request.get_json()    """Register new user with profile in a transaction."""def register():@auth_bp.route('/register', methods=['POST'])from app.models import Userfrom app.database import MongoDB```python### Example 1: User Registration with Profile## Real-World Examples```    session.end_session()finally:        raise    session.abort_transaction()    # Manually rollbackexcept Exception as e:        session.commit_transaction()    # Manually commit        }, session=session)        'author_id': user_id        'title': 'My First Article',    Article.insert_one({        }, session=session)        'name': 'John Doe'        'email': 'user@example.com',    user_id = User.insert_one({    # Perform operationstry:session.start_transaction()session = MongoDB.start_session()from app.models import User, Articlefrom app.database import MongoDB```pythonFor more control over transaction lifecycle:### Method 2: Manual Transaction Management```# Transaction automatically aborts if any exception occurs# Transaction automatically commits if no exception        }, session=session)        'content': 'Article content...'        'author_id': user_id,        'title': 'My First Article',    Article.insert_one({        }, session=session)        'name': 'John Doe'        'email': 'user@example.com',    user_id = User.insert_one({    # All operations within this block are part of the transactionwith MongoDB.transaction() as session:# Simple transactionfrom app.models import User, Articlefrom app.database import MongoDB```pythonThe easiest and safest way to use transactions:### Method 1: Context Manager (Recommended)## Usage Methods```docker exec mongodb-rs mongosh --eval "rs.initiate()"# Initialize replica set  --replSet rs0  mongo:latest \  --name mongodb-rs \docker run -d -p 27017:27017 \```bash**Docker Setup:**```mongosh --eval "rs.initiate()"# Initialize replica setsudo systemctl start mongodb# Start MongoDB  replSetName: "rs0"replication:# Add these lines:sudo nano /etc/mongod.conf# Edit MongoDB configsudo systemctl stop mongodb# Stop MongoDB```bashIf you're running MongoDB standalone, you need to convert it to a replica set:### Setting Up a Replica Set (for local development)Transactions are **NOT supported** on standalone MongoDB instances.- MongoDB 4.2+ with sharded cluster- MongoDB 4.0+ with **replica set** configuration, OR**Important**: MongoDB transactions require:## PrerequisitesMongoDB transactions allow you to execute multiple operations atomically - either all operations succeed, or all fail. This ensures data consistency across multiple documents and collections."""
+
+from typing import Dict, Optional, List
+from datetime import datetime
+from bson import ObjectId
+from app.database import get_db
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class BaseModel:
+    """Base model with common operations."""
+    
+    collection_name = None
+    
+    @classmethod
+    def get_collection(cls):
+        """Get the collection for this model."""
+        db = get_db()
+        return db[cls.collection_name]
+    
+    @classmethod
+    def find_one(cls, query: Dict, session=None) -> Optional[Dict]:
+        """Find a single document."""
+        try:
+            collection = cls.get_collection()
+            doc = collection.find_one(query, session=session)
+            if doc and '_id' in doc:
+                doc['id'] = str(doc['_id'])
+            return doc
+        except Exception as e:
+            logger.error(f'Error finding document in {cls.collection_name}: {str(e)}')
+            return None
+    
+    @classmethod
+    def find_many(cls, query: Dict = None, skip: int = 0, limit: int = 10, sort: List = None, session=None) -> List[Dict]:
+        """Find multiple documents."""
+        try:
+            collection = cls.get_collection()
+            query = query or {}
+            cursor = collection.find(query, session=session).skip(skip).limit(limit)
+            
+            if sort:
+                cursor = cursor.sort(sort)
+            
+            docs = []
+            for doc in cursor:
+                if '_id' in doc:
+                    doc['id'] = str(doc['_id'])
+                docs.append(doc)
+            
+            return docs
+        except Exception as e:
+            logger.error(f'Error finding documents in {cls.collection_name}: {str(e)}')
+            return []
+    
+    @classmethod
+    def count(cls, query: Dict = None, session=None) -> int:
+        """Count documents."""
+        try:
+            collection = cls.get_collection()
+            return collection.count_documents(query or {}, session=session)
+        except Exception as e:
+            logger.error(f'Error counting documents in {cls.collection_name}: {str(e)}')
+            return 0
+    
+    @classmethod
+    def insert_one(cls, document: Dict, session=None) -> Optional[str]:
+        """Insert a single document."""
+        try:
+            collection = cls.get_collection()
+            document['created_at'] = datetime.utcnow()
+            document['updated_at'] = datetime.utcnow()
+            result = collection.insert_one(document, session=session)
+            return str(result.inserted_id)
+        except Exception as e:
+            logger.error(f'Error inserting document in {cls.collection_name}: {str(e)}')
+            return None
+    
+    @classmethod
+    def update_one(cls, query: Dict, update: Dict, session=None) -> bool:
+        """Update a single document."""
+        try:
+            collection = cls.get_collection()
+            update['$set'] = update.get('$set', {})
+            update['$set']['updated_at'] = datetime.utcnow()
+            result = collection.update_one(query, update, session=session)
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f'Error updating document in {cls.collection_name}: {str(e)}')
+            return False
+    
+    @classmethod
+    def delete_one(cls, query: Dict, session=None) -> bool:
+        """Delete a single document."""
+        try:
+            collection = cls.get_collection()
+            result = collection.delete_one(query, session=session)
+            return result.deleted_count > 0
+        except Exception as e:
+            logger.error(f'Error deleting document in {cls.collection_name}: {str(e)}')
+            return False
+    
+    @classmethod
+    def find_by_id(cls, doc_id: str, session=None) -> Optional[Dict]:
+        """Find document by ID."""
+        try:
+            return cls.find_one({'_id': ObjectId(doc_id)}, session=session)
+        except Exception as e:
+            logger.error(f'Error finding document by ID in {cls.collection_name}: {str(e)}')
+            return None
+
+
+class User(BaseModel):
+    """User model."""
+    collection_name = 'users'
+    
+    @classmethod
+    def find_by_email(cls, email: str) -> Optional[Dict]:
+        """Find user by email."""
+        return cls.find_one({'email': email})
+
+
+class Article(BaseModel):
+    """Article model."""
+    collection_name = 'articles'
+    
+    @classmethod
+    def find_by_slug(cls, slug: str) -> Optional[Dict]:
+        """Find article by slug."""
+        return cls.find_one({'slug': slug})
+    
+    @classmethod
+    def find_by_category(cls, category_id: str, skip: int = 0, limit: int = 10) -> List[Dict]:
+        """Find articles by category."""
+        return cls.find_many({'category_id': category_id}, skip=skip, limit=limit, sort=[('created_at', -1)])
+    
+    @classmethod
+    def search(cls, search_term: str, skip: int = 0, limit: int = 10) -> List[Dict]:
+        """Search articles by title or content."""
+        return cls.find_many(
+            {'$text': {'$search': search_term}},
+            skip=skip,
+            limit=limit,
+            sort=[('created_at', -1)]
+        )
+
+
+class Category(BaseModel):
+    """Category model."""
+    collection_name = 'categories'
+    
+    @classmethod
+    def find_by_slug(cls, slug: str) -> Optional[Dict]:
+        """Find category by slug."""
+        return cls.find_one({'slug': slug})
+
+
+class Collection(BaseModel):
+    """Collection model."""
+    collection_name = 'collections'
+    
+    @classmethod
+    def find_by_user(cls, user_id: str, skip: int = 0, limit: int = 10) -> List[Dict]:
+        """Find collections by user."""
+        return cls.find_many({'user_id': user_id}, skip=skip, limit=limit, sort=[('created_at', -1)])
+    
+    @classmethod
+    def add_article(cls, collection_id: str, article_id: str) -> bool:
+        """Add article to collection."""
+        try:
+            collection = cls.get_collection()
+            result = collection.update_one(
+                {'_id': ObjectId(collection_id)},
+                {
+                    '$addToSet': {'article_ids': article_id},
+                    '$set': {'updated_at': datetime.utcnow()}
+                }
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f'Error adding article to collection: {str(e)}')
+            return False
+    
+    @classmethod
+    def remove_article(cls, collection_id: str, article_id: str) -> bool:
+        """Remove article from collection."""
+        try:
+            collection = cls.get_collection()
+            result = collection.update_one(
+                {'_id': ObjectId(collection_id)},
+                {
+                    '$pull': {'article_ids': article_id},
+                    '$set': {'updated_at': datetime.utcnow()}
+                }
+            )
+            return result.modified_count > 0
+        except Exception as e:
+            logger.error(f'Error removing article from collection: {str(e)}')
+            return False
+
+
+class File(BaseModel):
+    """File model."""
+    collection_name = 'files'
+    
+    @classmethod
+    def find_by_filename(cls, filename: str) -> Optional[Dict]:
+        """Find file by filename."""
+        return cls.find_one({'filename': filename})
