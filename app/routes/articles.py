@@ -14,7 +14,55 @@ articles_bp = Blueprint('articles', __name__, url_prefix='/api/articles')
 @articles_bp.route('', methods=['GET'])
 @handle_errors
 def get_articles():
-    """Get all articles with optional filtering"""
+    """Get all articles with optional filtering
+    ---
+    tags:
+      - Articles
+    parameters:
+      - name: page
+        in: query
+        type: integer
+        default: 1
+        description: Page number
+      - name: limit
+        in: query
+        type: integer
+        default: 10
+        description: Items per page (max 100)
+      - name: category_id
+        in: query
+        type: string
+        description: Filter by category ID
+      - name: search
+        in: query
+        type: string
+        description: Search in title and content
+    responses:
+      200:
+        description: List of articles
+        schema:
+          type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+            meta:
+              type: object
+              properties:
+                page:
+                  type: integer
+                limit:
+                  type: integer
+                total:
+                  type: integer
+                total_pages:
+                  type: integer
+                has_next:
+                  type: boolean
+                has_prev:
+                  type: boolean
+    """
     params = get_pagination_params(default_limit=10, max_limit=100)
     category_id = request.args.get('category_id', type=str)
     search = request.args.get('search', type=str)
@@ -41,7 +89,22 @@ def get_articles():
 @articles_bp.route('/<article_id>', methods=['GET'])
 @handle_errors
 def get_article(article_id):
-    """Get a specific article"""
+    """Get a specific article
+    ---
+    tags:
+      - Articles
+    parameters:
+      - name: article_id
+        in: path
+        type: string
+        required: true
+        description: Article ID
+    responses:
+      200:
+        description: Article details
+      404:
+        description: Article not found
+    """
     article = Article.find_by_id(article_id)
 
     if not article:
@@ -56,7 +119,55 @@ def get_article(article_id):
 @validate_request(CREATE_ARTICLE_SCHEMA)
 @handle_errors
 def create_article(validated_data):
-    """Create a new article"""
+    """Create a new article
+    ---
+    tags:
+      - Articles
+    security:
+      - Bearer: []
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - title
+            - slug
+            - content
+            - category_id
+          properties:
+            title:
+              type: string
+              example: My First Article
+            slug:
+              type: string
+              pattern: "^[a-z0-9-]+$"
+              example: my-first-article
+            content:
+              type: string
+              example: This is the article content...
+            excerpt:
+              type: string
+              example: Short description
+            category_id:
+              type: string
+            published:
+              type: boolean
+              default: false
+            tags:
+              type: array
+              items:
+                type: string
+              example: ["tech", "tutorial"]
+    responses:
+      201:
+        description: Article created successfully
+      400:
+        description: Validation error or duplicate slug
+      401:
+        description: Unauthorized
+    """
     # Check if slug already exists
     existing = Article.find_by_slug(validated_data['slug'])
     if existing:
@@ -76,7 +187,51 @@ def create_article(validated_data):
 @validate_request(UPDATE_ARTICLE_SCHEMA)
 @handle_errors
 def update_article(validated_data, article_id):
-    """Update an article"""
+    """Update an article
+    ---
+    tags:
+      - Articles
+    security:
+      - Bearer: []
+    parameters:
+      - name: article_id
+        in: path
+        type: string
+        required: true
+        description: Article ID
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            title:
+              type: string
+            slug:
+              type: string
+              pattern: "^[a-z0-9-]+$"
+            content:
+              type: string
+            excerpt:
+              type: string
+            category_id:
+              type: string
+            published:
+              type: boolean
+            tags:
+              type: array
+              items:
+                type: string
+    responses:
+      200:
+        description: Article updated successfully
+      400:
+        description: Validation error or duplicate slug
+      401:
+        description: Unauthorized
+      404:
+        description: Article not found
+    """
     article = Article.find_by_id(article_id)
     if not article:
         return jsonify({'error': 'Article not found'}), 404
@@ -100,7 +255,26 @@ def update_article(validated_data, article_id):
 @require_auth
 @handle_errors
 def delete_article(article_id):
-    """Delete an article"""
+    """Delete an article
+    ---
+    tags:
+      - Articles
+    security:
+      - Bearer: []
+    parameters:
+      - name: article_id
+        in: path
+        type: string
+        required: true
+        description: Article ID
+    responses:
+      200:
+        description: Article deleted successfully
+      401:
+        description: Unauthorized
+      404:
+        description: Article not found
+    """
     article = Article.find_by_id(article_id)
     if not article:
         return jsonify({'error': 'Article not found'}), 404
@@ -118,7 +292,26 @@ def delete_article(article_id):
 @require_auth
 @handle_errors
 def publish_article(article_id):
-    """Publish an article"""
+    """Publish an article
+    ---
+    tags:
+      - Articles
+    security:
+      - Bearer: []
+    parameters:
+      - name: article_id
+        in: path
+        type: string
+        required: true
+        description: Article ID
+    responses:
+      200:
+        description: Article published successfully
+      401:
+        description: Unauthorized
+      404:
+        description: Article not found
+    """
     article = Article.find_by_id(article_id)
     if not article:
         return jsonify({'error': 'Article not found'}), 404
