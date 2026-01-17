@@ -49,6 +49,11 @@ class Settings:
     # Security settings
     SECRET_KEY: str = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
 
+    # JWT settings
+    JWT_ALGORITHM: str = 'HS256'
+    JWT_EXPIRATION_HOURS: int = int(os.getenv('JWT_EXPIRATION_HOURS', 24))
+    JWT_REFRESH_EXPIRATION_DAYS: int = int(os.getenv('JWT_REFRESH_EXPIRATION_DAYS', 7))
+
     @classmethod
     def load_from_env(cls):
         """Load settings from environment variables."""

@@ -6,7 +6,8 @@ from functools import wraps
 
 from flask import jsonify, request
 
-from app.core import ValidationError
+from app.core.validator import ValidationError
+from app.utils.jwt_utils import get_user_from_token
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -76,16 +77,13 @@ def handle_errors(f):
 
 def get_user_id_from_token():
     """
-    Extract user ID from JWT token (placeholder).
-    In production, implement proper JWT validation.
+    Extract user ID from JWT token.
+
+    Returns:
+        User ID string if token is valid, None otherwise
     """
-    # TODO: Implement JWT token validation
-    # For now, return a mock user ID
-    auth_header = request.headers.get('Authorization')
-    if auth_header and auth_header.startswith('Bearer '):
-        # In production, decode and validate JWT
-        return 'mock_user_id_123'
-    return None
+    user = get_user_from_token()
+    return user['user_id'] if user else None
 
 
 def require_auth(f):
@@ -109,3 +107,74 @@ def require_auth(f):
         return f(*args, **kwargs)
 
     return wrapper
+
+
+def login_required(f):
+    """
+    Decorator to require user login.
+    Alias for require_auth with more explicit naming.
+
+    Usage:
+        @bp.route('/dashboard')
+        @login_required
+        def dashboard():
+            user_id = get_user_id_from_token()
+            # Your code here
+    """
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        user = get_user_from_token()
+        if not user:
+            logger.warning(f'{request.path}: Login required - unauthorized access attempt')
+            return jsonify({'error': 'Login required'}), 401
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
+def role_required(*allowed_roles):
+    """
+    Decorator to require specific user roles.
+
+    Usage:
+        @bp.route('/admin')
+        @role_required('admin')
+        def admin_panel():
+            # Your code here
+
+        @bp.route('/content')
+        @role_required('admin', 'editor')
+        def manage_content():
+            # Your code here
+    """
+
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            user = get_user_from_token()
+            if not user:
+                logger.warning(f'{request.path}: Authentication required for role check')
+                return jsonify({'error': 'Authentication required'}), 401
+
+            # Get user role from token or database
+            user_role = user.get('role')
+
+            # If no role in token, fetch from database
+            if not user_role:
+                from app.models import User
+
+                user_doc = User.find_one({'_id': user['user_id']})
+                user_role = user_doc.get('role') if user_doc else None
+
+            if not user_role or user_role not in allowed_roles:
+                logger.warning(f'{request.path}: Forbidden - user role "{user_role}" not in {allowed_roles}')
+                return jsonify(
+                    {'error': 'Forbidden', 'message': f'Requires one of these roles: {", ".join(allowed_roles)}'}
+                ), 403
+
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

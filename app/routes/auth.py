@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify
 from app.models import User
 from app.schemas import LOGIN_SCHEMA, REGISTER_SCHEMA
 from app.utils.decorators import get_user_id_from_token, handle_errors, require_auth, validate_request
+from app.utils.jwt_utils import generate_token
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -178,8 +179,8 @@ def login(validated_data):
         logger.warning(f'Failed login attempt: {validated_data["email"]}')
         return jsonify({'error': 'Invalid email or password'}), 401
 
-    # TODO: Generate actual JWT token
-    token = f'mock_token_for_{user["id"]}'
+    # Generate JWT token with user role
+    token = generate_token(user['id'], user['email'], user.get('role', 'user'))
 
     logger.info(f'User logged in successfully: {validated_data["email"]}')
 
