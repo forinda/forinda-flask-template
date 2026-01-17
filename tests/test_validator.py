@@ -4,7 +4,7 @@ Tests for validator library.
 
 import pytest
 
-from app.lib import Schema, ValidationError
+from app.core import Schema, ValidationError
 
 
 class TestStringField:

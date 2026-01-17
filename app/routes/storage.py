@@ -4,7 +4,7 @@ from app.utils.file_manager import file_manager
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
-storage_bp = Blueprint('storage', __name__, url_prefix='/api/storage')
+storage_bp = Blueprint('storage', __name__, url_prefix='/api/v1/storage')
 
 
 @storage_bp.route('/info', methods=['GET'])

@@ -2,7 +2,7 @@
 File model for managing uploaded files and file metadata.
 """
 
-from app.lib.base_model import BaseModel
+from app.core.base_model import BaseModel
 
 
 class File(BaseModel):

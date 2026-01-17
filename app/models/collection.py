@@ -6,7 +6,7 @@ from datetime import datetime
 
 from bson import ObjectId
 
-from app.lib.base_model import BaseModel
+from app.core.base_model import BaseModel
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)

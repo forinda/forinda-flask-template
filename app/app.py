@@ -26,7 +26,7 @@ def create_app():
     CORS(
         app,
         resources={
-            r'/api/(?!docs|swagger\.json|flasgger_static).*': {
+            r'/api/v1/.*': {
                 'origins': settings.CORS_ORIGINS,
                 'methods': settings.CORS_METHODS,
                 'allow_headers': settings.CORS_ALLOW_HEADERS,

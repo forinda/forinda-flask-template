@@ -4,7 +4,7 @@ from app.utils.file_manager import file_manager
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
-files_bp = Blueprint('files', __name__, url_prefix='/api/files')
+files_bp = Blueprint('files', __name__, url_prefix='/api/v1/files')
 
 
 @files_bp.route('', methods=['GET'])

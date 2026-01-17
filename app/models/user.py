@@ -2,7 +2,7 @@
 User model for authentication and user management.
 """
 
-from app.lib.base_model import BaseModel
+from app.core.base_model import BaseModel
 
 
 class User(BaseModel):

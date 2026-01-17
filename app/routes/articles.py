@@ -8,7 +8,7 @@ from app.utils.logger import get_logger
 from app.utils.pagination import get_pagination_params, paginate_response
 
 logger = get_logger(__name__)
-articles_bp = Blueprint('articles', __name__, url_prefix='/api/articles')
+articles_bp = Blueprint('articles', __name__, url_prefix='/api/v1/articles')
 
 
 @articles_bp.route('', methods=['GET'])

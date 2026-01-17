@@ -2,7 +2,7 @@
 Category model for organizing articles and content.
 """
 
-from app.lib.base_model import BaseModel
+from app.core.base_model import BaseModel
 
 
 class Category(BaseModel):

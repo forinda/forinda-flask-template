@@ -8,7 +8,7 @@ from app.utils.decorators import get_user_id_from_token, handle_errors, require_
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
-auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+auth_bp = Blueprint('auth', __name__, url_prefix='/api/v1/auth')
 
 
 def hash_password(password: str) -> str:

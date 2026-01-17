@@ -35,7 +35,7 @@ class Settings:
     API_DESCRIPTION: str = 'A Flask REST API with Swagger documentation'
 
     # Swagger settings
-    SWAGGER_URL: str = '/api/docs'
+    SWAGGER_URL: str = '/'  # '/api/v1/docs'
     SWAGGER_API_URL: str = '/api/swagger.json'
 
     # MongoDB settings

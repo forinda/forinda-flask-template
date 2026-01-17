@@ -2,7 +2,7 @@
 Collection validation schemas.
 """
 
-from app.lib import Schema
+from app.core import Schema
 
 CREATE_COLLECTION_SCHEMA = Schema(
     {

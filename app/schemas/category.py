@@ -2,7 +2,7 @@
 Category validation schemas.
 """
 
-from app.lib import Schema
+from app.core import Schema
 
 CREATE_CATEGORY_SCHEMA = Schema(
     {

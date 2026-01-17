@@ -2,6 +2,8 @@
 Swagger/OpenAPI configuration for the Flask API.
 """
 
+from app.settings import settings
+
 
 def get_swagger_config():
     """Return Swagger UI configuration."""
@@ -10,14 +12,14 @@ def get_swagger_config():
         'specs': [
             {
                 'endpoint': 'apispec',
-                'route': '/api/swagger.json',
+                'route': settings.SWAGGER_API_URL,
                 'rule_filter': lambda rule: True,
                 'model_filter': lambda tag: True,
             }
         ],
         'static_url_path': '/flasgger_static',
         'swagger_ui': True,
-        'specs_route': '/api/docs',
+        'specs_route': settings.SWAGGER_URL,
     }
 
 
@@ -26,13 +28,13 @@ def get_swagger_template():
     return {
         'swagger': '2.0',
         'info': {
-            'title': 'Flask API',
-            'description': 'A Flask REST API with Swagger documentation',
-            'version': '1.0.0',
+            'title': settings.API_TITLE,
+            'description': settings.API_DESCRIPTION,
+            'version': settings.API_VERSION,
             'contact': {'name': 'API Support', 'email': 'support@example.com'},
         },
         'host': 'localhost:8000',
-        'basePath': '/',
+        'basePath': '/api/v1',
         'schemes': ['http', 'https'],
         'consumes': ['application/json'],
         'produces': ['application/json'],

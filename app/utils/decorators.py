@@ -6,7 +6,7 @@ from functools import wraps
 
 from flask import jsonify, request
 
-from app.lib import ValidationError
+from app.core import ValidationError
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)

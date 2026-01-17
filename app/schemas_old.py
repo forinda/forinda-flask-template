@@ -2,7 +2,7 @@
 Validation schemas for API endpoints.
 """
 
-from app.lib import Schema
+from app.core import Schema
 
 # ============================================================================
 # Authentication Schemas

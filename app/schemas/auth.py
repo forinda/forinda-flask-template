@@ -2,7 +2,7 @@
 Authentication validation schemas.
 """
 
-from app.lib import Schema
+from app.core import Schema
 
 REGISTER_SCHEMA = Schema(
     {

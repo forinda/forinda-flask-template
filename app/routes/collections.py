@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
-collections_bp = Blueprint('collections', __name__, url_prefix='/api/collections')
+collections_bp = Blueprint('collections', __name__, url_prefix='/api/v1/collections')
 
 
 @collections_bp.route('', methods=['GET'])
