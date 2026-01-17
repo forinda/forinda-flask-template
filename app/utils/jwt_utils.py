@@ -61,13 +61,24 @@ def decode_token(token: str) -> dict | None:
 def get_token_from_header() -> str | None:
     """
     Extract JWT token from Authorization header.
+    Handles both 'Bearer <token>' and raw token formats.
 
     Returns:
         Token string if present, None otherwise
     """
     auth_header = request.headers.get('Authorization')
-    if auth_header and auth_header.startswith('Bearer '):
-        return auth_header.split(' ')[1]
+    if not auth_header:
+        return None
+
+    # Handle "Bearer <token>" format
+    if auth_header.startswith('Bearer '):
+        return auth_header.split(' ', 1)[1]
+
+    # Handle raw token (without Bearer prefix)
+    # JWT tokens start with eyJ
+    if auth_header.startswith('eyJ'):
+        return auth_header
+
     return None
 
 

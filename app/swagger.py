@@ -43,9 +43,15 @@ def get_swagger_template():
                 'type': 'apiKey',
                 'name': 'Authorization',
                 'in': 'header',
-                'description': "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'",
+                'description': (
+                    'JWT Authorization header. '
+                    'Enter your JWT token in the text input below. '
+                    'Example: "eyJhbGciOiJIUzI1NiIsInR5cCI6..." '
+                    '(without Bearer prefix - it will be added automatically)'
+                ),
             }
         },
+        'security': [{'Bearer': []}],
         'tags': [
             {'name': 'Health', 'description': 'Health check endpoints'},
             {'name': 'API', 'description': 'General API endpoints'},
