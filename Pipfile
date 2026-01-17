@@ -12,6 +12,10 @@ pymongo = "*"
 python-dotenv = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-cov = "*"
+pytest-flask = "*"
+ruff = "*"
 
 [requires]
 python_version = "3.12"

@@ -1,12 +1,30 @@
-from flask import Blueprint, jsonify, request
+import hashlib
+
+from flask import Blueprint, jsonify
+
+from app.models import User
+from app.schemas import LOGIN_SCHEMA, REGISTER_SCHEMA
+from app.utils.decorators import get_user_id_from_token, handle_errors, require_auth, validate_request
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 
+def hash_password(password: str) -> str:
+    """Hash password using SHA256 (use bcrypt in production)."""
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verify password against hash."""
+    return hash_password(password) == hashed
+
+
 @auth_bp.route('/register', methods=['POST'])
-def register():
+@validate_request(REGISTER_SCHEMA)
+@handle_errors
+def register(validated_data):
     """
     Register a new user
     ---
@@ -50,8 +68,8 @@ def register():
               type: object
               properties:
                 id:
-                  type: integer
-                  example: 1
+                  type: string
+                  example: 507f1f77bcf86cd799439011
                 email:
                   type: string
                   example: user@example.com
@@ -67,27 +85,33 @@ def register():
               type: string
               example: User already exists
     """
-    data = request.get_json()
-    
-    if not data or not all(key in data for key in ['email', 'password', 'name']):
-        logger.warning('Registration attempt with missing fields')
-        return jsonify(error='Missing required fields: email, password, name'), 400
-    
-    # TODO: Implement actual user registration logic
-    logger.info(f'User registration attempt: {data.get("email")}')
-    
+    # Check if user already exists
+    existing_user = User.find_by_email(validated_data['email'])
+    if existing_user:
+        logger.warning(f'Registration attempt with existing email: {validated_data["email"]}')
+        return jsonify({'error': 'User already exists'}), 400
+
+    # Create new user
+    user_data = {
+        'email': validated_data['email'],
+        'password': hash_password(validated_data['password']),
+        'name': validated_data['name'],
+        'role': 'user',
+    }
+
+    user_id = User.insert_one(user_data)
+    logger.info(f'User registered successfully: {validated_data["email"]} (ID: {user_id})')
+
     return jsonify(
         message='User registered successfully',
-        user={
-            'id': 1,
-            'email': data['email'],
-            'name': data['name']
-        }
+        user={'id': user_id, 'email': validated_data['email'], 'name': validated_data['name']},
     ), 201
 
 
 @auth_bp.route('/login', methods=['POST'])
-def login():
+@validate_request(LOGIN_SCHEMA)
+@handle_errors
+def login(validated_data):
     """
     User login
     ---
@@ -130,8 +154,8 @@ def login():
               type: object
               properties:
                 id:
-                  type: integer
-                  example: 1
+                  type: string
+                  example: 507f1f77bcf86cd799439011
                 email:
                   type: string
                   example: user@example.com
@@ -147,27 +171,28 @@ def login():
               type: string
               example: Invalid email or password
     """
-    data = request.get_json()
-    
-    if not data or not all(key in data for key in ['email', 'password']):
-        logger.warning('Login attempt with missing credentials')
-        return jsonify(error='Missing required fields: email, password'), 400
-    
-    # TODO: Implement actual authentication logic
-    logger.info(f'Login attempt: {data.get("email")}')
-    
+    # Find user by email
+    user = User.find_by_email(validated_data['email'])
+
+    if not user or not verify_password(validated_data['password'], user.get('password', '')):
+        logger.warning(f'Failed login attempt: {validated_data["email"]}')
+        return jsonify({'error': 'Invalid email or password'}), 401
+
+    # TODO: Generate actual JWT token
+    token = f'mock_token_for_{user["id"]}'
+
+    logger.info(f'User logged in successfully: {validated_data["email"]}')
+
     return jsonify(
         message='Login successful',
-        token='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example.token',
-        user={
-            'id': 1,
-            'email': data['email'],
-            'name': 'John Doe'
-        }
+        token=token,
+        user={'id': user['id'], 'email': user['email'], 'name': user.get('name', '')},
     ), 200
 
 
 @auth_bp.route('/logout', methods=['POST'])
+@require_auth
+@handle_errors
 def logout():
     """
     User logout
@@ -190,13 +215,16 @@ def logout():
       401:
         description: Unauthorized
     """
-    # TODO: Implement actual logout logic (token invalidation)
-    logger.info('User logout')
-    
+    # TODO: Implement token blacklist/invalidation
+    user_id = get_user_id_from_token()
+    logger.info(f'User logout: {user_id}')
+
     return jsonify(message='Logout successful'), 200
 
 
 @auth_bp.route('/me', methods=['GET'])
+@require_auth
+@handle_errors
 def get_current_user():
     """
     Get current user profile
@@ -214,8 +242,8 @@ def get_current_user():
           type: object
           properties:
             id:
-              type: integer
-              example: 1
+              type: string
+              example: 507f1f77bcf86cd799439011
             email:
               type: string
               example: user@example.com
@@ -229,12 +257,16 @@ def get_current_user():
       401:
         description: Unauthorized
     """
-    # TODO: Implement actual user profile retrieval
-    logger.info('Get current user profile')
-    
-    return jsonify(
-        id=1,
-        email='user@example.com',
-        name='John Doe',
-        created_at='2026-01-17T10:30:00Z'
-    ), 200
+    user_id = get_user_id_from_token()
+    user = User.find_by_id(user_id)
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    logger.info(f'Get user profile: {user_id}')
+
+    # Remove password from response
+    user.pop('password', None)
+    user.pop('_id', None)
+
+    return jsonify(user), 200

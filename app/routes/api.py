@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flasgger import swag_from
+
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)

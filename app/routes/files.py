@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, send_file
-from app.utils.logger import get_logger
+
 from app.utils.file_manager import file_manager
+from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 files_bp = Blueprint('files', __name__, url_prefix='/api/files')
@@ -65,9 +66,9 @@ def list_files():
     page = request.args.get('page', 1, type=int)
     limit = request.args.get('limit', 20, type=int)
     search = request.args.get('search', type=str)
-    
+
     logger.info(f'List files: page={page}, limit={limit}, search={search}')
-    
+
     result = file_manager.list_files(page=page, limit=limit, search=search)
     return jsonify(result), 200
 
@@ -125,19 +126,16 @@ def upload_file():
     if 'file' not in request.files:
         logger.warning('Upload attempt without file')
         return jsonify(error='No file part in request'), 400
-    
+
     file = request.files['file']
     custom_filename = request.form.get('filename')  # Optional custom filename
-    
+
     success, message, file_info = file_manager.save_file(file, custom_filename)
-    
+
     if not success:
         return jsonify(error=message), 400
-    
-    return jsonify(
-        message=message,
-        file=file_info
-    ), 201
+
+    return jsonify(message=message, file=file_info), 201
 
 
 @files_bp.route('/<filename>', methods=['GET'])
@@ -181,11 +179,11 @@ def get_file_details(filename):
         description: File not found
     """
     file_info = file_manager.get_file_info(filename)
-    
+
     if not file_info:
         logger.warning(f'File not found: {filename}')
         return jsonify(error='File not found'), 404
-    
+
     file_info['id'] = filename
     logger.info(f'Get file details: {filename}')
     return jsonify(file_info), 200
@@ -217,16 +215,16 @@ def download_file(filename):
         description: File not found
     """
     filepath = file_manager.get_filepath(filename)
-    
+
     if not filepath:
         logger.warning(f'Download attempt for non-existent file: {filename}')
         return jsonify(error='File not found'), 404
-    
+
     try:
         logger.info(f'File downloaded: {filename}')
         return send_file(filepath, as_attachment=True, download_name=filename)
     except Exception as e:
-        logger.error(f'Error downloading file: {str(e)}')
+        logger.error(f'Error downloading file: {e!s}')
         return jsonify(error='Failed to download file'), 500
 
 
@@ -262,9 +260,9 @@ def delete_file(filename):
         description: Unauthorized
     """
     success, message = file_manager.delete_file(filename)
-    
+
     if not success:
         status_code = 404 if 'not found' in message.lower() else 500
         return jsonify(error=message), status_code
-    
+
     return jsonify(message=message), 200

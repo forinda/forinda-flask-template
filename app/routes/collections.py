@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -75,9 +76,9 @@ def get_collections():
     page = request.args.get('page', 1, type=int)
     limit = request.args.get('limit', 10, type=int)
     user_id = request.args.get('user_id', type=int)
-    
+
     logger.info(f'Get collections: page={page}, limit={limit}, user_id={user_id}')
-    
+
     # TODO: Implement actual database query
     collections = [
         {
@@ -87,16 +88,11 @@ def get_collections():
             'user': {'id': 1, 'name': 'John Doe'},
             'article_count': 5,
             'is_public': True,
-            'created_at': '2026-01-17T10:00:00Z'
+            'created_at': '2026-01-17T10:00:00Z',
         }
     ]
-    
-    return jsonify(
-        collections=collections,
-        total=len(collections),
-        page=page,
-        limit=limit
-    ), 200
+
+    return jsonify(collections=collections, total=len(collections), page=page, limit=limit), 200
 
 
 @collections_bp.route('/<int:collection_id>', methods=['GET'])
@@ -144,7 +140,7 @@ def get_collection(collection_id):
         description: Collection not found
     """
     logger.info(f'Get collection: {collection_id}')
-    
+
     # TODO: Implement actual database query
     return jsonify(
         id=collection_id,
@@ -156,12 +152,12 @@ def get_collection(collection_id):
                 'id': 1,
                 'title': 'Introduction to Flask',
                 'slug': 'introduction-to-flask',
-                'excerpt': 'Learn the basics of Flask'
+                'excerpt': 'Learn the basics of Flask',
             }
         ],
         is_public=True,
         created_at='2026-01-17T10:00:00Z',
-        updated_at='2026-01-17T10:00:00Z'
+        updated_at='2026-01-17T10:00:00Z',
     ), 200
 
 
@@ -212,13 +208,13 @@ def create_collection():
         description: Unauthorized
     """
     data = request.get_json()
-    
+
     if not data or 'name' not in data:
         logger.warning('Create collection attempt with missing fields')
         return jsonify(error='Missing required field: name'), 400
-    
+
     logger.info(f'Create collection: {data.get("name")}')
-    
+
     # TODO: Implement actual database insertion
     return jsonify(
         message='Collection created successfully',
@@ -227,8 +223,8 @@ def create_collection():
             'name': data['name'],
             'description': data.get('description', ''),
             'is_public': data.get('is_public', False),
-            'created_at': '2026-01-17T10:00:00Z'
-        }
+            'created_at': '2026-01-17T10:00:00Z',
+        },
     ), 201
 
 
@@ -279,7 +275,7 @@ def update_collection(collection_id):
     """
     data = request.get_json()
     logger.info(f'Update collection: {collection_id}')
-    
+
     # TODO: Implement actual database update
     return jsonify(
         message='Collection updated successfully',
@@ -288,8 +284,8 @@ def update_collection(collection_id):
             'name': data.get('name', 'My Collection'),
             'description': data.get('description', ''),
             'is_public': data.get('is_public', False),
-            'updated_at': '2026-01-17T10:00:00Z'
-        }
+            'updated_at': '2026-01-17T10:00:00Z',
+        },
     ), 200
 
 
@@ -325,7 +321,7 @@ def delete_collection(collection_id):
         description: Unauthorized
     """
     logger.info(f'Delete collection: {collection_id}')
-    
+
     # TODO: Implement actual database deletion
     return jsonify(message='Collection deleted successfully'), 200
 
@@ -375,14 +371,14 @@ def add_article_to_collection(collection_id):
         description: Unauthorized
     """
     data = request.get_json()
-    
+
     if not data or 'article_id' not in data:
         logger.warning('Add article to collection attempt with missing article_id')
         return jsonify(error='Missing required field: article_id'), 400
-    
+
     article_id = data['article_id']
     logger.info(f'Add article {article_id} to collection {collection_id}')
-    
+
     # TODO: Implement actual database insertion
     return jsonify(message='Article added to collection successfully'), 200
 
@@ -424,6 +420,6 @@ def remove_article_from_collection(collection_id, article_id):
         description: Unauthorized
     """
     logger.info(f'Remove article {article_id} from collection {collection_id}')
-    
+
     # TODO: Implement actual database deletion
     return jsonify(message='Article removed from collection successfully'), 200
